@@ -9,30 +9,26 @@ use Illuminate\Validation\Rule;
 
 class TaskController extends Controller
 {
-    // GET /api/tasks
+
     public function index()
     {
         return response()->json(Task::all());
     }
 
-    // POST /api/tasks
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string',
+            'title' => [
+                'required',
+                'string',
+                // Laravel PRO validation (better than manual check)
+                \Illuminate\Validation\Rule::unique('tasks')->where(function ($query) use ($request) {
+                    return $query->where('due_date', $request->due_date);
+                }),
+            ],
             'due_date' => 'required|date|after_or_equal:today',
-            'priority' => ['required', Rule::in(['low', 'medium', 'high'])],
+            'priority' => ['required', \Illuminate\Validation\Rule::in(['low', 'medium', 'high'])],
         ]);
-
-        $exists = Task::where('title', $validated['title'])
-            ->where('due_date', $validated['due_date'])
-            ->exists();
-
-        if ($exists) {
-            return response()->json([
-                'message' => 'Task with same title and due date already exists'
-            ], 400);
-        }
 
         $task = Task::create([
             'title' => $validated['title'],
@@ -41,10 +37,14 @@ class TaskController extends Controller
             'status' => 'pending',
         ]);
 
-        return response()->json($task, 201);
+        return response()->json([
+            'message' => 'Task created successfully',
+            'data' => $task
+        ], 201);
     }
 
-    // PATCH /api/tasks/{id}/status
+
+    
     public function updateStatus($id, Request $request)
     {
         $task = Task::findOrFail($id);
@@ -59,7 +59,6 @@ class TaskController extends Controller
         return response()->json($task);
     }
 
-    // DELETE /api/tasks/{id}
     public function destroy($id)
     {
         $task = Task::findOrFail($id);
@@ -68,7 +67,6 @@ class TaskController extends Controller
         return response()->json(['message' => 'Task deleted']);
     }
 
-    // GET /api/tasks/report
     public function report()
     {
         return response()->json([
