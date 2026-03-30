@@ -10,10 +10,46 @@ use Illuminate\Validation\Rule;
 class TaskController extends Controller
 {
 
-    public function index()
+
+    public function index(Request $request)
     {
-        return response()->json(Task::all());
-    }
+        $query = Task::query();
+
+       
+        if ($request->has('status')) {
+
+            $allowedStatus = ['pending', 'in_progress', 'done'];
+
+            if (!in_array($request->status, $allowedStatus)) {
+                return response()->json([
+                    'message' => 'Invalid status value'
+                ], 400);
+            }
+
+            $query->where('status', $request->status);
+        }
+
+        
+        $tasks = $query
+            ->orderByRaw("FIELD(priority, 'high', 'medium', 'low')")
+            ->orderBy('due_date', 'asc')
+            ->paginate(10);
+
+        
+        if ($tasks->isEmpty()) {
+            return response()->json([
+                'message' => 'No tasks found',
+                'data' => []
+            ], 200);
+        }
+
+        
+        return response()->json([
+            'message' => 'Tasks retrieved successfully',
+            'data' => $tasks
+        ], 200);
+    }    
+
 
     public function store(Request $request)
     {
@@ -21,7 +57,7 @@ class TaskController extends Controller
             'title' => [
                 'required',
                 'string',
-                // Laravel PRO validation (better than manual check)
+                
                 \Illuminate\Validation\Rule::unique('tasks')->where(function ($query) use ($request) {
                     return $query->where('due_date', $request->due_date);
                 }),
