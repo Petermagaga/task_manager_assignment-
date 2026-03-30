@@ -80,20 +80,50 @@ class TaskController extends Controller
     }
 
 
-    
-    public function updateStatus($id, Request $request)
-    {
-        $task = Task::findOrFail($id);
 
-        $request->validate([
-            'status' => 'required|in:pending,in_progress,done',
+    public function updateStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:pending,in_progress,done'
         ]);
 
-        $task->status = $request->status;
+        $task = Task::find($id);
+
+        if (!$task) {
+            return response()->json([
+                'message' => 'Task not found'
+            ], 404);
+        }
+
+        $currentStatus = $task->status;
+        $newStatus = $validated['status'];
+
+        $allowedTransitions = [
+            'pending' => ['in_progress'],
+            'in_progress' => ['done'],
+            'done' => []
+        ];
+
+        // Safety check (in case DB has unexpected value)
+        if (!isset($allowedTransitions[$currentStatus])) {
+            return response()->json([
+                'message' => 'Invalid current status in database'
+            ], 500);
+        }
+
+        if (!in_array($newStatus, $allowedTransitions[$currentStatus])) {
+            return response()->json([
+                'message' => "Invalid status transition from $currentStatus to $newStatus"
+            ], 400);
+        }
+
+        $task->status = $newStatus;
         $task->save();
 
-        return response()->json($task);
+        return response()->json($task, 200);
     }
+
+
 
     public function destroy($id)
     {
