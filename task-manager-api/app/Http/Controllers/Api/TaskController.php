@@ -124,14 +124,31 @@ class TaskController extends Controller
     }
 
 
-
     public function destroy($id)
     {
-        $task = Task::findOrFail($id);
+        try {
+            $task = Task::findOrFail($id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Task not found'
+            ], 404);
+        }
+
+        // Enforce business rule
+        if ($task->status !== 'done') {
+            return response()->json([
+                'message' => 'Only completed tasks can be deleted'
+            ], 403);
+        }
+
         $task->delete();
 
-        return response()->json(['message' => 'Task deleted']);
+        return response()->json([
+            'message' => 'Task deleted successfully'
+        ], 200); 
     }
+
+
 
     public function report()
     {
