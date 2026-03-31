@@ -9,4 +9,5 @@ Route::prefix('tasks')->group(function () {
     Route::patch('{id}/status', [TaskController::class, 'updateStatus']);
     Route::delete('{id}', [TaskController::class, 'destroy']);
     Route::get('report', [TaskController::class, 'report']); // bonus
+
 });
