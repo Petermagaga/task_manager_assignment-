@@ -1,4 +1,4 @@
-<?php
+<?php  
 
 namespace App\Http\Controllers\Api;
 
@@ -104,7 +104,7 @@ class TaskController extends Controller
             'done' => []
         ];
 
-        // Safety check (in case DB has unexpected value)
+        
         if (!isset($allowedTransitions[$currentStatus])) {
             return response()->json([
                 'message' => 'Invalid current status in database'
@@ -134,7 +134,7 @@ class TaskController extends Controller
             ], 404);
         }
 
-        // Enforce business rule
+        
         if ($task->status !== 'done') {
             return response()->json([
                 'message' => 'Only completed tasks can be deleted'
@@ -149,14 +149,40 @@ class TaskController extends Controller
     }
 
 
-
-    public function report()
+    public function report(Request $request)
     {
-        return response()->json([
-            'total' => Task::count(),
-            'pending' => Task::where('status', 'pending')->count(),
-            'in_progress' => Task::where('status', 'in_progress')->count(),
-            'done' => Task::where('status', 'done')->count(),
+        
+        $request->validate([
+            'date' => 'required|date'
         ]);
+
+        $date = $request->date;
+
+        
+        $tasks = Task::whereDate('due_date', $date)->get();
+
+        
+        $priorities = ['high', 'medium', 'low'];
+        $statuses = ['pending', 'in_progress', 'done'];
+
+        $summary = [];
+
+        foreach ($priorities as $priority) {
+            $summary[$priority] = [];
+
+            foreach ($statuses as $status) {
+                $summary[$priority][$status] = 0;
+            }
+        }
+
+        foreach ($tasks as $task) {
+            $summary[$task->priority][$task->status]++;
+        }
+
+
+        return response()->json([
+            'date' => $date,
+            'summary' => $summary
+        ], 200);
     }
-}
+    }
