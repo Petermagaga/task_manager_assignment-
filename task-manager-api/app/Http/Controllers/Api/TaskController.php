@@ -36,13 +36,12 @@ class TaskController extends Controller
             ->paginate(10);
 
         
-        if ($tasks->count()=== 0) {
+        if ($tasks->total() === 0) {
             return response()->json([
                 'message' => 'No tasks found',
                 'data' => []
             ], 200);
         }
-
         
         return response()->json([
             'message' => 'Tasks retrieved successfully',
