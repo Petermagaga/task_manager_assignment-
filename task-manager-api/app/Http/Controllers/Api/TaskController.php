@@ -11,12 +11,13 @@ class TaskController extends Controller
 {
 
 
+
     public function index(Request $request)
     {
         $query = Task::query();
 
        
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
 
             $allowedStatus = ['pending', 'in_progress', 'done'];
 
@@ -29,27 +30,20 @@ class TaskController extends Controller
             $query->where('status', $request->status);
         }
 
-        
+     
         $tasks = $query
             ->orderByRaw("FIELD(priority, 'high', 'medium', 'low')")
             ->orderBy('due_date', 'asc')
-            ->paginate(10);
+            ->get();
 
-        
-        if ($tasks->total() === 0) {
-            return response()->json([
-                'message' => 'No tasks found',
-                'data' => []
-            ], 200);
-        }
-        
+     
+            
         return response()->json([
-            'message' => 'Tasks retrieved successfully',
+            'message' => $tasks->isEmpty() ? 'No tasks found' : 'Tasks retrieved successfully',
             'data' => $tasks
         ], 200);
+    }   
 
-        
-    }    
 
 
     public function store(Request $request)
