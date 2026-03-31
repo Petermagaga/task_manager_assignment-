@@ -36,7 +36,7 @@ class TaskController extends Controller
             ->paginate(10);
 
         
-        if ($tasks->isEmpty()) {
+        if ($tasks->count()=== 0) {
             return response()->json([
                 'message' => 'No tasks found',
                 'data' => []

@@ -8,6 +8,6 @@ Route::prefix('tasks')->group(function () {
     Route::get('/', [TaskController::class, 'index']);
     Route::patch('{id}/status', [TaskController::class, 'updateStatus']);
     Route::delete('{id}', [TaskController::class, 'destroy']);
-    Route::get('report', [TaskController::class, 'report']); // bonus
+    Route::get('report', [TaskController::class, 'report']);
 
 });
