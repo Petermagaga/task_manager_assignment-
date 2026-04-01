@@ -1,12 +1,12 @@
 # Task Manager API (Laravel)
 
-## Overview
+## 📖 Overview
 This is a Task Management API built using Laravel.  
 It allows users to create, manage, and track tasks while enforcing strict business rules.
 
 ---
 
-## Features
+## 🚀 Features
 - Create tasks with validation rules
 - List tasks with sorting (priority & due date)
 - Update task status with strict transitions
@@ -15,7 +15,7 @@ It allows users to create, manage, and track tasks while enforcing strict busine
 
 ---
 
-##  Tech Stack
+## 🛠️ Tech Stack
 - Laravel (PHP Framework)
 - MySQL (Local Development)
 - PostgreSQL (Railway Deployment)
@@ -59,8 +59,7 @@ php artisan serve
 API will run at:
 
 http://127.0.0.1:8000
-
-_____Deployment (Railway)_____
+🌐 Deployment (Railway)
 Steps used:
 Push project to GitHub
 Create a new project on Railway
